@@ -16,7 +16,7 @@ import Menu from './components/Menu.vue'
 <style scoped>
 .view {
   display: grid;
-  grid-template-columns: minmax(250px, 15%) 1fr; 
+  grid-template-columns: 250px 1fr; 
   height: 100vh;  
 }
 

@@ -60,11 +60,14 @@ const goToLab = (labName) => {
 .info {
     padding-top: 2.5rem;
     position: fixed;
-    padding-left: 10px;
+    width: 250px;
+    text-align: center;
 }
 .me {
+    box-sizing: border-box;
     text-align: end;
     bottom: 1rem;
+    padding-right: 1rem;
 }
 .list {
     padding-left: 25px;
