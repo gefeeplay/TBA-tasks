@@ -126,58 +126,6 @@ watch(number, (newVal) => {
 
 <style scoped>
 
-h3 {
-    text-align: start;
-}
-
-.panel {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  border-radius: 20px;
-  width: 600px;
-  padding: 20px;
-  background-color: rgba(23, 23, 23, 0.6);
-  color: rgb(200, 200, 200);
-  box-shadow: 5px 5px 10px rgba(97, 97, 97, 0.2);
-}
-
-.params {
-  margin-top: 2rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1.2rem;
-  width: 100%;
-}
-
-.param {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-  padding: 12px 15px;
-  border: 1px solid rgba(97, 97, 97, 0.3);
-  border-radius: 15px;
-  background: rgba(40, 40, 40, 0.5);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.param:hover {
-  transform: translateY(-5px);
-  box-shadow: 2px 4px 5px rgba(97, 97, 97, 0.2);
-}
-
-.param-input.out-of-range {
-  color: red;
-  border: 1px solid rgb(167, 67, 67);
-}
-
-/* Строки */
-.param-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
 /* Первая строка */
 .param-row.small {
   font-size: 0.8rem;
@@ -212,51 +160,4 @@ h3 {
   padding: 6px 4px;
 }
 
-
-.param-input {
-  padding: 8px 4px;
-  border-radius: 10px;
-  border: 1px solid rgba(97, 97, 97, 0.3);
-  background: rgba(60, 60, 60, 0.6);
-  color: white;
-  font-family: "Comfortaa", "Open Sans", sans-serif;
-  font-weight: bold;
-  font-size: 1rem;
-  width: 11rem;
-  text-align: end;
-}
-
-.param-input::-webkit-inner-spin-button,
-.param-input::-webkit-outer-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-.param-ans {
-  padding: 8px 4px;
-  border-radius: 10px;
-  border: 1px solid rgba(97, 97, 97, 0.3);
-  background: rgba(60, 60, 60, 0.6);
-  color: white;
-  font-family: "Comfortaa", "Open Sans", sans-serif;
-  font-weight: bold;
-  width: 11rem;
-  height: 1rem;
-  text-align: end;
-}
-
-/* Кнопка */
-.start-btn {
-  margin-top: 1.5rem;
-  border: 1px solid rgba(97, 97, 97, 0.3);
-  border-radius: 10px;
-  padding: 15px;
-  cursor: pointer;
-  background: rgba(60, 60, 60, 0.6);
-  transition: 0.2s;
-}
-.start-btn:hover {
-  background: rgba(100, 100, 100, 0.6);
-  color: white;
-}
 </style>
