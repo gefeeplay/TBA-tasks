@@ -50,21 +50,24 @@ function FFT(seq) {
     if (N % i === 0) { N1 = i; N2 = N / i; break; }
   }
 
-  // шаги Кули–Тьюки
+  // шаг 1 таблица n1, n2
   let table = Array.from({ length: N1 }, () => new Array(N2));
   for (let n = 0; n < N; n++) {
     let n1 = Math.floor(n / N2), n2 = n % N2;
     table[n1][n2] = seq[n];
   }
 
+  // шаг 2 БПФ по строкам
   for (let n1 = 0; n1 < N1; n1++) table[n1] = FFT(table[n1]);
 
+  // шаг 3 домножение на поворачивающие множители
   for (let n1 = 0; n1 < N1; n1++) {
     for (let k2 = 0; k2 < N2; k2++) {
       table[n1][k2] = table[n1][k2].mul(twiddle(n1 * k2, N));
     }
   }
 
+  // шаг 4 БПФ по столбцам
   let resultTable = Array.from({ length: N2 }, () => new Array(N1));
   for (let k2 = 0; k2 < N2; k2++) {
     let col = [];
@@ -73,6 +76,7 @@ function FFT(seq) {
     for (let k1 = 0; k1 < N1; k1++) resultTable[k2][k1] = colFFT[k1];
   }
 
+  // шаг 5 развёртка результата
   let output = [];
   for (let k1 = 0; k1 < N1; k1++) {
     for (let k2 = 0; k2 < N2; k2++) output.push(resultTable[k2][k1]);
