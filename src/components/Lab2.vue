@@ -219,8 +219,9 @@ const method = ref('');
 }
 
 .method {
-  height: 3rem;
-  width: 15rem;
+
+  width: 18rem;
+  font-size: 0.8rem;
   text-align:end;
 }
 .answ-table {
