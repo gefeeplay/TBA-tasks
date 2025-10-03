@@ -34,10 +34,14 @@ function isPrime(x) {
   return true;
 }
 
-// универсальный Cooley–Tukey FFT
+let usedMethod = "";
+
+/// ---------------- Алгоритм ----------------
 function FFT(seq) {
   const N = seq.length;
+
   if (N <= 1) return seq;
+
   if (isPrime(N)) return DFT(seq);
 
   // находим разложение N = N1 * N2
@@ -46,24 +50,21 @@ function FFT(seq) {
     if (N % i === 0) { N1 = i; N2 = N / i; break; }
   }
 
-  // шаг 1: таблица
+  // шаги Кули–Тьюки
   let table = Array.from({ length: N1 }, () => new Array(N2));
   for (let n = 0; n < N; n++) {
     let n1 = Math.floor(n / N2), n2 = n % N2;
     table[n1][n2] = seq[n];
   }
 
-  // шаг 2: FFT по строкам
   for (let n1 = 0; n1 < N1; n1++) table[n1] = FFT(table[n1]);
 
-  // шаг 3: поворотные множители
   for (let n1 = 0; n1 < N1; n1++) {
     for (let k2 = 0; k2 < N2; k2++) {
       table[n1][k2] = table[n1][k2].mul(twiddle(n1 * k2, N));
     }
   }
 
-  // шаг 4: FFT по столбцам
   let resultTable = Array.from({ length: N2 }, () => new Array(N1));
   for (let k2 = 0; k2 < N2; k2++) {
     let col = [];
@@ -72,12 +73,31 @@ function FFT(seq) {
     for (let k1 = 0; k1 < N1; k1++) resultTable[k2][k1] = colFFT[k1];
   }
 
-  // шаг 5: обратно в 1D
   let output = [];
   for (let k1 = 0; k1 < N1; k1++) {
     for (let k2 = 0; k2 < N2; k2++) output.push(resultTable[k2][k1]);
   }
   return output;
+}
+
+// ---------------- Обёртка с методом ----------------
+function runFFT(seq) {
+  const N = seq.length;
+  if (N <= 1) {
+    usedMethod = "N = 1 → Тривиальный случай";
+    return seq;
+  }
+  if (isPrime(N)) {
+    usedMethod = `N = ${N} (простое) → прямой ДПФ`;
+    return DFT(seq);
+  }
+  // если составное
+  let N1 = -1, N2 = -1;
+  for (let i = 2; i <= Math.sqrt(N); i++) {
+    if (N % i === 0) { N1 = i; N2 = N / i; break; }
+  }
+  usedMethod = `N = ${N} (составное) → Кули–Тьюки (${N1} × ${N2})`;
+  return FFT(seq);
 }
 
 // ---------------- Vue часть ----------------
@@ -88,7 +108,13 @@ const parsedInput = computed(() =>
 
 const N = computed(() => parsedInput.value.length);
 
-const output = computed(() => FFT(parsedInput.value));
+const output = computed(() => {
+  const res = runFFT(parsedInput.value);
+  method.value = usedMethod;
+  return res;
+});
+
+const method = ref('');
 </script>
 
 <template>
@@ -117,6 +143,17 @@ const output = computed(() => FFT(parsedInput.value));
         </div>
         <div class="big">
           <div class="param-ans">{{ N }}</div>
+        </div>
+      </div>
+
+      <!-- Метод -->
+      <div class="param">
+        <div class="param-row small">
+          <div class="param-label">Использованный метод</div>
+          <div class="param-range">определяется автоматически</div>
+        </div>
+        <div class="big">
+          <div class="param-ans method">{{ method }}</div>
         </div>
       </div>
 
@@ -181,6 +218,11 @@ const output = computed(() => FFT(parsedInput.value));
   padding: 6px 4px;
 }
 
+.method {
+  height: 3rem;
+  width: 15rem;
+  text-align:end;
+}
 .answ-table {
   width: 100%;
   border-collapse: collapse;
