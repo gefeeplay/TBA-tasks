@@ -196,6 +196,10 @@ const output = computed(() => {
 </template>
 
 <style scoped>
+
+.panel {
+    margin-top: 2rem;
+}
 /* Первая строка */
 .param-row.small {
     font-size: 0.8rem;
