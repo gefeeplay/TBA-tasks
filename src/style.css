@@ -104,6 +104,36 @@ h3 {
 }
 
 
+/*Таблица*/
+.answ-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  background: rgba(40, 40, 40, 0.5);
+  border: 1px solid rgba(97, 97, 97, 0.3);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.answ-table thead {
+  background: rgba(60, 60, 60, 0.7);
+}
+
+.answ-table th,
+.answ-table td {
+  border: 1px solid rgba(97, 97, 97, 0.3);
+  padding: 6px 10px;
+  text-align: center;
+  color: rgb(200, 200, 200);
+}
+
+.answ-table th {
+  font-weight: bold;
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+  color: rgb(220, 220, 220);
+}
 
 
 
