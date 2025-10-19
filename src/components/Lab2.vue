@@ -36,53 +36,70 @@ function isPrime(x) {
 
 let usedMethod = "";
 
-/// ---------------- Алгоритм ----------------
+// табличный метод
 function FFT(seq) {
   const N = seq.length;
 
   if (N <= 1) return seq;
-
   if (isPrime(N)) return DFT(seq);
 
-  // находим разложение N = N1 * N2
+  // ---------- найти разложение N = N1 * N2 ----------
   let N1 = -1, N2 = -1;
   for (let i = 2; i <= Math.sqrt(N); i++) {
     if (N % i === 0) { N1 = i; N2 = N / i; break; }
   }
+  if (N1 === -1) return DFT(seq); // на всякий случай
 
-  // шаг 1 таблица n1, n2
-  let table = Array.from({ length: N1 }, () => new Array(N2));
+  // ---------- шаг 1: заполнение таблицы ----------
+  // n = N1 * n2 + n1
+  // => n1 in [0..N1-1], n2 in [0..N2-1]
+  let table = Array.from({ length: N1 }, () => Array.from({ length: N2 }, () => null));
   for (let n = 0; n < N; n++) {
-    let n1 = Math.floor(n / N2), n2 = n % N2;
+    const n1 = n % N1;                // обратимо из n = N1*n2 + n1
+    const n2 = Math.floor(n / N1);
+    // эквивалентно: n = N1*n2 + n1
     table[n1][n2] = seq[n];
   }
 
-  // шаг 2 БПФ по строкам
-  for (let n1 = 0; n1 < N1; n1++) table[n1] = FFT(table[n1]);
+  // ---------- шаг 2: FFT по строкам (длина N2) ----------
+  // каждая строка table[n1] имеет длину N2
+  for (let n1 = 0; n1 < N1; n1++) {
+    // рекурсивный вызов на длине N2
+    table[n1] = FFT(table[n1]);
+  }
 
-  // шаг 3 домножение на поворачивающие множители
+  // ---------- шаг 3: домножение на поворачивающие множители ----------
+  // twiddle: W_N^(n1 * k2)
   for (let n1 = 0; n1 < N1; n1++) {
     for (let k2 = 0; k2 < N2; k2++) {
       table[n1][k2] = table[n1][k2].mul(twiddle(n1 * k2, N));
     }
   }
 
-  // шаг 4 БПФ по столбцам
-  let resultTable = Array.from({ length: N2 }, () => new Array(N1));
+  // ---------- шаг 4: FFT по столбцам (длина N1) ----------
+  // построим таблицу результатов размерности N2 x N1 (строка — k2, столбец — k1)
+  let resultTable = Array.from({ length: N2 }, () => Array.from({ length: N1 }, () => null));
   for (let k2 = 0; k2 < N2; k2++) {
-    let col = [];
+    // собираем столбец: элементы table[n1][k2] для n1=0..N1-1
+    const col = [];
     for (let n1 = 0; n1 < N1; n1++) col.push(table[n1][k2]);
-    let colFFT = FFT(col);
+    const colFFT = FFT(col); // длина N1
     for (let k1 = 0; k1 < N1; k1++) resultTable[k2][k1] = colFFT[k1];
   }
 
-  // шаг 5 развёртка результата
-  let output = [];
+  // ---------- шаг 5: развёртка результата в 1D ----------
+  // k: k = N2 * k1 + k2
+  const output = new Array(N);
   for (let k1 = 0; k1 < N1; k1++) {
-    for (let k2 = 0; k2 < N2; k2++) output.push(resultTable[k2][k1]);
+    for (let k2 = 0; k2 < N2; k2++) {
+      const k = N2 * k1 + k2;
+      output[k] = resultTable[k2][k1]; // resultTable indexed [k2][k1]
+    }
   }
+
   return output;
 }
+
 
 // ---------------- Обёртка с методом ----------------
 function runFFT(seq) {
@@ -172,7 +189,7 @@ const method = ref('');
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(c,i) in output" :key="i">
+          <tr v-for="(c, i) in output" :key="i">
             <td>{{ i }}</td>
             <td>{{ c.re.toFixed(3) }}</td>
             <td>{{ c.im.toFixed(3) }}</td>
@@ -213,9 +230,11 @@ const method = ref('');
 .param-title {
   font-weight: 600;
 }
+
 .param-label {
   padding: 6px 10px;
 }
+
 .param-range {
   width: 12rem;
   text-align: end;
@@ -225,6 +244,6 @@ const method = ref('');
 .method {
   width: 18rem;
   font-size: 0.8rem;
-  text-align:end;
+  text-align: end;
 }
 </style>
