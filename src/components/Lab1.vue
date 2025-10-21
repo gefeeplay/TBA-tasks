@@ -1,4 +1,4 @@
-<script setup>
+<script setup> 
 import { ref, watch } from 'vue'
 
 const number = ref(0)
@@ -31,12 +31,6 @@ function gcd(a, b) {
   return a
 }
 
-/** Проверка введенного массива на коректность (num < mul of modules)**/
-function isProductGreaterThanNumber(number, modules) {
-  const product = modules.reduce((acc, val) => acc * val, 1)
-  return product > number
-}  
-
 /** Проверка взаимной простоты массива модулей */
 function checkCoprime(mods) {
   for (let i = 0; i < mods.length; i++) {
@@ -47,6 +41,12 @@ function checkCoprime(mods) {
     }
   }
   return true
+}
+
+/** Проверка, что произведение модулей больше введённого числа */
+function checkProduct(mods, num) {
+  const product = mods.reduce((acc, m) => acc * m, 1)
+  return product > num
 }
 
 /** Автоподбор взаимно простых модулей */
@@ -93,14 +93,21 @@ watch(userModules, (newVal) => {
       .split(',')
       .map(n => parseInt(n.trim()))
       .filter(n => !isNaN(n) && n > 0)
-      inputClassOfModules.value = 'param-input'
+    inputClassOfModules.value = 'param-input'
 
+    // Проверка взаимной простоты
     if (!checkCoprime(parsed)) {
-      /*alert('Ошибка: модули должны быть взаимно простыми!')*/
       inputClassOfModules.value = 'param-input out-of-range'
       modules.value = []
       answer.value = null
+      return
+    }
 
+    // Проверка произведения
+    if (!checkProduct(parsed, number.value)) {
+      inputClassOfModules.value = 'param-input out-of-range'
+      modules.value = []
+      answer.value = null
       return
     }
 
@@ -117,17 +124,12 @@ watch(number, (newVal) => {
     if (!showInput.value) {
       modules.value = auto_modules(newVal)
       answer.value = lab1(newVal, modules.value)
-    } 
-    else if (userModules.value.trim() !== '') {
+    } else if (userModules.value.trim() !== '') {
       const parsed = userModules.value
         .split(',')
         .map(n => parseInt(n.trim()))
         .filter(n => !isNaN(n))
-
-      const productCheck = isProductGreaterThanNumber(newVal, parsed)
-      
-      if (!checkCoprime(parsed) || productCheck) {
-        /*alert('Ошибка: модули должны быть взаимно простыми!')*/
+      if (!checkCoprime(parsed) || !checkProduct(parsed, newVal)) {
         inputClassOfModules.value = 'param-input out-of-range'
         modules.value = []
         answer.value = null
