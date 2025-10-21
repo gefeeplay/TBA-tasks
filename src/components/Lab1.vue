@@ -31,6 +31,12 @@ function gcd(a, b) {
   return a
 }
 
+/** Проверка введенного массива на коректность (num < mul of modules)**/
+function isProductGreaterThanNumber(number, modules) {
+  const product = modules.reduce((acc, val) => acc * val, 1)
+  return product > number
+}  
+
 /** Проверка взаимной простоты массива модулей */
 function checkCoprime(mods) {
   for (let i = 0; i < mods.length; i++) {
@@ -111,12 +117,14 @@ watch(number, (newVal) => {
     if (!showInput.value) {
       modules.value = auto_modules(newVal)
       answer.value = lab1(newVal, modules.value)
-    } else if (userModules.value.trim() !== '') {
+    } 
+    else if (userModules.value.trim() !== '') {
+      const valid = isProductGreaterThanNumber(newVal, modules.value)
       const parsed = userModules.value
         .split(',')
         .map(n => parseInt(n.trim()))
         .filter(n => !isNaN(n))
-      if (!checkCoprime(parsed)) {
+      if (!checkCoprime(parsed) && !valid) {
         /*alert('Ошибка: модули должны быть взаимно простыми!')*/
         inputClassOfModules.value = 'param-input out-of-range'
         modules.value = []
