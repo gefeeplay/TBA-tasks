@@ -126,7 +126,7 @@ watch(number, (newVal) => {
 
       const productCheck = isProductGreaterThanNumber(newVal, parsed)
       
-      if (!checkCoprime(parsed) || !productCheck) {
+      if (!checkCoprime(parsed) || productCheck) {
         /*alert('Ошибка: модули должны быть взаимно простыми!')*/
         inputClassOfModules.value = 'param-input out-of-range'
         modules.value = []
