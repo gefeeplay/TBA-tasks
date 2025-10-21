@@ -119,12 +119,14 @@ watch(number, (newVal) => {
       answer.value = lab1(newVal, modules.value)
     } 
     else if (userModules.value.trim() !== '') {
-      const valid = isProductGreaterThanNumber(newVal, modules.value)
       const parsed = userModules.value
         .split(',')
         .map(n => parseInt(n.trim()))
         .filter(n => !isNaN(n))
-      if (!checkCoprime(parsed) && !valid) {
+
+      const productCheck = isProductGreaterThanNumber(newVal, parsed)
+      
+      if (!checkCoprime(parsed) || !productCheck) {
         /*alert('Ошибка: модули должны быть взаимно простыми!')*/
         inputClassOfModules.value = 'param-input out-of-range'
         modules.value = []
