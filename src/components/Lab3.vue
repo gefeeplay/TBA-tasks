@@ -112,7 +112,7 @@ const parsedInput = computed(() =>
 const output = computed(() => {
     try {
         const res = GoodThomasFFT(parsedInput.value, N1.value, N2.value);
-        method.value = `Метод Гуда–Томаса (${N1.value} × ${N2.value}), gcd=1`;
+        method.value = `Метод Гуда–Томаса (${N1.value} × ${N2.value})`;
         return res;
     } catch (e) {
         method.value = e.message;
