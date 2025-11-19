@@ -1,0 +1,153 @@
+@import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap');
+
+:root {
+  font-family: "Comfortaa", "Open Sans", sans-serif;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  width: 100%;
+  height: 100vh;
+  box-sizing: border-box;
+  background: rgb(10, 10, 10);
+  color: rgb(200, 200, 200);
+}
+
+/* -------Лабы-------*/
+
+h3 {
+    text-align: start;
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-radius: 20px;
+  width: 600px;
+  padding: 20px;
+  background-color: rgba(23, 23, 23, 1);
+  color: rgb(200, 200, 200);
+  box-shadow: 0px 0px 100px 30px rgba(23, 23, 23, 1);
+}
+
+.params {
+  margin-top: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  width: 100%;
+}
+
+.param {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 12px 15px;
+  border: 1px solid rgba(97, 97, 97, 0.3);
+  border-radius: 15px;
+  background: rgba(40, 40, 40, 0.5);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.param:hover {
+  transform: translateY(-5px);
+  box-shadow: 2px 4px 5px rgba(97, 97, 97, 0.2);
+}
+
+.param-input.out-of-range {
+  color: red;
+  border: 1px solid rgb(167, 67, 67);
+}
+
+/* Строки */
+.param-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.param-input {
+  padding: 8px 4px;
+  border-radius: 10px;
+  border: 1px solid rgba(97, 97, 97, 0.3);
+  background: rgba(60, 60, 60, 0.6);
+  color: white;
+  font-family: "Comfortaa", "Open Sans", sans-serif;
+  font-weight: bold;
+  font-size: 1rem;
+  width: 15rem;
+  text-align: end;
+}
+
+.param-input::-webkit-inner-spin-button,
+.param-input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.param-ans {
+  padding: 8px 4px;
+  border-radius: 10px;
+  border: 1px solid rgba(97, 97, 97, 0.3);
+  background: rgba(60, 60, 60, 0.6);
+  color: white;
+  font-family: "Comfortaa", "Open Sans", sans-serif;
+  font-weight: bold;
+  width: 11rem;
+  height: 1rem;
+  text-align: end;
+}
+
+
+/*Таблица*/
+.answ-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  background: rgba(40, 40, 40, 0.5);
+  border: 1px solid rgba(97, 97, 97, 0.3);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.answ-table thead {
+  background: rgba(60, 60, 60, 0.7);
+}
+
+.answ-table th,
+.answ-table td {
+  border: 1px solid rgba(97, 97, 97, 0.3);
+  padding: 6px 10px;
+  text-align: center;
+  color: rgb(200, 200, 200);
+}
+
+.answ-table th {
+  font-weight: bold;
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+  color: rgb(220, 220, 220);
+}
+
+
+
+/* No use Кнопка */
+.start-btn {
+  margin-top: 1.5rem;
+  border: 1px solid rgba(97, 97, 97, 0.3);
+  border-radius: 10px;
+  padding: 15px;
+  cursor: pointer;
+  background: rgba(60, 60, 60, 0.6);
+  transition: 0.2s;
+}
+.start-btn:hover {
+  background: rgba(100, 100, 100, 0.6);
+  color: white;
+}
