@@ -1,5 +1,18 @@
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, watch, onMounted } from "vue";
+
+const method = ref('');
+const N1 = ref(null)
+const N2 = ref(null)
+const showNInput = ref(false)
+const inputClassN = ref('param-input')
+const inputModeN = ref('Автоматический расчёт')
+
+const N = computed(() => parsedInput.value.length);
+const inputText = ref("1,2,3,4,5,6,7,8"); // строка ввода
+const parsedInput = computed(() =>
+  inputText.value.split(",").map(x => new Complex(parseFloat(x.trim()) || 0, 0))
+);
 
 // ---------------- Комплексные числа ----------------
 class Complex {
@@ -34,74 +47,86 @@ function isPrime(x) {
   return true;
 }
 
-let usedMethod = "";
+/** Переключение между ручным вводом и авто */
+function toggleNInput() {
+  showNInput.value = !showNInput.value
+  inputModeN.value = showNInput.value ? 'Ручной ввод' : 'Автоматический расчёт'
+
+  if (!showNInput.value && number.value > 0) {
+    // автоматическое разложение (например, на 2 и N/2)
+    const factors = autoDecompose(number.value)
+    N1.value = factors[0]
+    N2.value = factors[1]
+  } else {
+    N1.value = null
+    N2.value = null
+  }
+}
+
+/** Простейшее авторазложение */
+function autoDecompose(n) {
+  for (let i = 2; i <= Math.sqrt(n); i++) {
+    if (n % i === 0) {
+      return [i, n / i]
+    }
+  }
+  return [1, n] 
+}
 
 // табличный метод
 function FFT(seq) {
   const N = seq.length;
-
   if (N <= 1) return seq;
   if (isPrime(N)) return DFT(seq);
 
-  // ---------- найти разложение N = N1 * N2 ----------
-  let N1 = -1, N2 = -1;
-  for (let i = 2; i <= Math.sqrt(N); i++) {
-    if (N % i === 0) { N1 = i; N2 = N / i; break; }
-  }
-  if (N1 === -1) return DFT(seq); // на всякий случай
+  // Используем Vue-переменные, если они заданы
+  let n1 = N1.value, n2 = N2.value;
 
-  // ---------- шаг 1: заполнение таблицы ----------
-  // n = N1 * n2 + n1
-  // => n1 in [0..N1-1], n2 in [0..N2-1]
-  let table = Array.from({ length: N1 }, () => Array.from({ length: N2 }, () => null));
+  // Если ручные не заданы или некорректны — авторазложение
+  if (!n1 || !n2 || n1 * n2 !== N) {
+    [n1, n2] = autoDecompose(N);
+  }
+
+  // ---------- шаг 1: построение таблицы ----------
+  let table = Array.from({ length: n1 }, () => Array.from({ length: n2 }, () => null));
   for (let n = 0; n < N; n++) {
-    const n1 = n % N1;                // обратимо из n = N1*n2 + n1
-    const n2 = Math.floor(n / N1);
-    // эквивалентно: n = N1*n2 + n1
-    table[n1][n2] = seq[n];
+    const n1_idx = n % n1;
+    const n2_idx = Math.floor(n / n1);
+    table[n1_idx][n2_idx] = seq[n];
   }
 
-  // ---------- шаг 2: FFT по строкам (длина N2) ----------
-  // каждая строка table[n1] имеет длину N2
-  for (let n1 = 0; n1 < N1; n1++) {
-    // рекурсивный вызов на длине N2
-    table[n1] = FFT(table[n1]);
-  }
+  // ---------- шаг 2: FFT по строкам ----------
+  for (let i = 0; i < n1; i++) table[i] = FFT(table[i]);
 
-  // ---------- шаг 3: домножение на поворачивающие множители ----------
-  // twiddle: W_N^(n1 * k2)
-  for (let n1 = 0; n1 < N1; n1++) {
-    for (let k2 = 0; k2 < N2; k2++) {
-      table[n1][k2] = table[n1][k2].mul(twiddle(n1 * k2, N));
+  // ---------- шаг 3: домножение ----------
+  for (let i = 0; i < n1; i++) {
+    for (let j = 0; j < n2; j++) {
+      table[i][j] = table[i][j].mul(twiddle(i * j, N));
     }
   }
 
-  // ---------- шаг 4: FFT по столбцам (длина N1) ----------
-  // построим таблицу результатов размерности N2 x N1 (строка — k2, столбец — k1)
-  let resultTable = Array.from({ length: N2 }, () => Array.from({ length: N1 }, () => null));
-  for (let k2 = 0; k2 < N2; k2++) {
-    // собираем столбец: элементы table[n1][k2] для n1=0..N1-1
+  // ---------- шаг 4: FFT по столбцам ----------
+  let resultTable = Array.from({ length: n2 }, () => Array.from({ length: n1 }, () => null));
+  for (let j = 0; j < n2; j++) {
     const col = [];
-    for (let n1 = 0; n1 < N1; n1++) col.push(table[n1][k2]);
-    const colFFT = FFT(col); // длина N1
-    for (let k1 = 0; k1 < N1; k1++) resultTable[k2][k1] = colFFT[k1];
+    for (let i = 0; i < n1; i++) col.push(table[i][j]);
+    const colFFT = FFT(col);
+    for (let k = 0; k < n1; k++) resultTable[j][k] = colFFT[k];
   }
 
-  // ---------- шаг 5: развёртка результата в 1D ----------
-  // k: k = N2 * k1 + k2
+  // ---------- шаг 5: развёртка ----------
   const output = new Array(N);
-  for (let k1 = 0; k1 < N1; k1++) {
-    for (let k2 = 0; k2 < N2; k2++) {
-      const k = N2 * k1 + k2;
-      output[k] = resultTable[k2][k1]; // resultTable indexed [k2][k1]
+  for (let k1 = 0; k1 < n1; k1++) {
+    for (let k2 = 0; k2 < n2; k2++) {
+      const k = n2 * k1 + k2;
+      output[k] = resultTable[k2][k1];
     }
   }
-
   return output;
 }
 
-
 // ---------------- Обёртка с методом ----------------
+let usedMethod = "";
 function runFFT(seq) {
   const N = seq.length;
   if (N <= 1) {
@@ -121,21 +146,40 @@ function runFFT(seq) {
   return FFT(seq);
 }
 
-// ---------------- Vue часть ----------------
-const inputText = ref("1,2,3,4,5,6,7,8"); // строка ввода
-const parsedInput = computed(() =>
-  inputText.value.split(",").map(x => new Complex(parseFloat(x.trim()) || 0, 0))
-);
+// обновляем N1, N2 при изменении входных данных
+watch(N, (newVal) => {
+  if (!showNInput.value && newVal > 1) {
+    const [a, b] = autoDecompose(newVal);
+    N1.value = a;
+    N2.value = b;
+  }
+});
 
-const N = computed(() => parsedInput.value.length);
+// при ручном вводе проверяем корректность и пересчитываем метод
+watch([N1, N2], ([newN1, newN2]) => {
+  if (showNInput.value && N.value > 1) {
+    if (newN1 && newN2 && newN1 * newN2 === N.value) {
+      method.value = `Ручной ввод корректен → (${newN1} × ${newN2})`;
+    } else {
+      method.value = `Ошибка: ${newN1} × ${newN2} ≠ ${N.value}`;
+    }
+  }
+});
 
+// Инициализация при загрузке
+onMounted(() => {
+  const [a, b] = autoDecompose(N.value);
+  N1.value = a;
+  N2.value = b;
+});
+
+// Вывод результата
 const output = computed(() => {
   const res = runFFT(parsedInput.value);
   method.value = usedMethod;
   return res;
 });
 
-const method = ref('');
 </script>
 
 <template>
@@ -164,6 +208,34 @@ const method = ref('');
         </div>
         <div class="big">
           <div class="param-ans">{{ N }}</div>
+        </div>
+      </div>
+
+      <!-- Разложение N = N1 * N2 -->
+      <div class="param">
+        <div class="param-row small">
+          <div class="param-label">Разложение числа N</div>
+          <div class="param-range">{{ inputModeN }}</div>
+        </div>
+
+        <div class="param-row big">
+          <div class="ans-btn">
+            <span class="material-symbols-outlined btn" @click="toggleNInput">draw</span>
+
+            <!-- Ручной ввод -->
+            <div v-if="showNInput">
+              <input class="input-nums" v-model.number="N1" :class="inputClassN" type="number" placeholder="N₁" />
+              <span style="margin: 0 0.5rem;">×</span>
+              <input class="input-nums" v-model.number="N2" :class="inputClassN" type="number" placeholder="N₂" />
+            </div>
+
+            <!-- Автоматический расчёт -->
+            <div v-else>
+              <div class="param-ans">
+                {{ N1 && N2 ? `${N1} × ${N2}` : '-' }}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -203,11 +275,6 @@ const method = ref('');
 
 
 <style scoped>
-/* Первая строка */
-.param-row.small {
-  font-size: 0.8rem;
-  color: #aaa;
-}
 
 /* Вторая строка */
 .big {
@@ -246,4 +313,27 @@ const method = ref('');
   font-size: 0.8rem;
   text-align: end;
 }
+.ans-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btn {
+  border: 1px solid rgba(97, 97, 97, 0.3);
+  border-radius: 1.5rem;
+  font-size: 1rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+.input-nums {
+  max-width: 7rem;
+}
+
 </style>

@@ -71,6 +71,18 @@ h3 {
   align-items: center;
 }
 
+/* Первая строка */
+.param-row.small {
+  font-size: 0.8rem;
+  color: #aaa;
+}
+
+/* Вторая строка */
+.param-row.big {
+  font-size: 1rem;
+  font-weight: 500;
+}
+
 .param-input {
   padding: 8px 4px;
   border-radius: 10px;
