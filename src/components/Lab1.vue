@@ -1,4 +1,4 @@
-<script setup>
+<script setup> 
 import { ref, watch } from 'vue'
 
 const number = ref(0)
@@ -41,6 +41,12 @@ function checkCoprime(mods) {
     }
   }
   return true
+}
+
+/** Проверка, что произведение модулей больше введённого числа */
+function checkProduct(mods, num) {
+  const product = mods.reduce((acc, m) => acc * m, 1)
+  return product > num
 }
 
 /** Автоподбор взаимно простых модулей */
@@ -87,14 +93,21 @@ watch(userModules, (newVal) => {
       .split(',')
       .map(n => parseInt(n.trim()))
       .filter(n => !isNaN(n) && n > 0)
-      inputClassOfModules.value = 'param-input'
+    inputClassOfModules.value = 'param-input'
 
+    // Проверка взаимной простоты
     if (!checkCoprime(parsed)) {
-      /*alert('Ошибка: модули должны быть взаимно простыми!')*/
       inputClassOfModules.value = 'param-input out-of-range'
       modules.value = []
       answer.value = null
+      return
+    }
 
+    // Проверка произведения
+    if (!checkProduct(parsed, number.value)) {
+      inputClassOfModules.value = 'param-input out-of-range'
+      modules.value = []
+      answer.value = null
       return
     }
 
@@ -116,8 +129,7 @@ watch(number, (newVal) => {
         .split(',')
         .map(n => parseInt(n.trim()))
         .filter(n => !isNaN(n))
-      if (!checkCoprime(parsed)) {
-        /*alert('Ошибка: модули должны быть взаимно простыми!')*/
+      if (!checkCoprime(parsed) || !checkProduct(parsed, newVal)) {
         inputClassOfModules.value = 'param-input out-of-range'
         modules.value = []
         answer.value = null
