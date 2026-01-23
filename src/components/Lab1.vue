@@ -210,19 +210,6 @@ watch(number, (newVal) => {
 
 <style scoped>
 
-/* Первая строка */
-.param-row.small {
-  font-size: 0.8rem;
-  color: #aaa;
-}
-
-/* Вторая строка */
-.param-row.big {
-  font-size: 1rem;
-  font-weight: 500;
-
-}
-
 .param-row-with-btn {
   display: flex;
   align-items: center;
@@ -261,8 +248,7 @@ watch(number, (newVal) => {
 
 .ans-btn {
   display: flex;
-  justify-content: center;
-  align-items: center;
+  min-width: 10rem;
   gap: 0.5rem; 
 }
 

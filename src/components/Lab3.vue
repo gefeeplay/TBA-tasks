@@ -200,11 +200,7 @@ const output = computed(() => {
 .panel {
     margin-top: 2rem;
 }
-/* Первая строка */
-.param-row.small {
-    font-size: 0.8rem;
-    color: #aaa;
-}
+
 
 .small-input {
     width: 3rem;
