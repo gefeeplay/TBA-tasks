@@ -1,5 +1,6 @@
 <script setup>
-import { ref, computed } from "vue"; 
+import { ref, computed } from "vue";
+import { Icon } from "@iconify/vue";
 
 // ---------------- Комплексные числа ----------------
 class Complex {
@@ -34,6 +35,8 @@ const N = computed(() => Math.pow(2, m.value)); //Итоговое кол-во �
 const m = computed(() => Math.ceil(Math.log2(N0.value || 1))); // степень двойки
 const zeros = computed(() => N.value - N0.value); // количество добавленных нулей
 const inputText = ref("1,2,3,4,5,6,7,8");
+
+const fileExist = ref(false);
 
 //Введенный массив
 const parsedInput = computed(() =>
@@ -87,23 +90,106 @@ const output = computed(() => {
     return fftRadix2(paddedInput.value);
 });
 
+//Чтение с файла
+function onFileChange(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    if (!file.name.endsWith(".txt")) {
+        alert("Поддерживаются только .txt файлы");
+        return;
+    }
+
+    fileExist.value = true;
+
+    const reader = new FileReader();
+
+    reader.onload = e => {
+
+        const text = e.target.result;
+
+        // разбиваем по запятым и переводам строки
+        const values = text
+            .split(/[\s,]+/)
+            .map(v => parseFloat(v))
+            .filter(v => !isNaN(v));
+
+        if (values.length === 0) {
+            alert("Файл не содержит числовых данных");
+            return;
+        }
+
+        // обновляем inputText → всё остальное пересчитается автоматически
+        inputText.value = values.join(",");
+    };
+
+    reader.readAsText(file);
+}
+
+//Создание файла с результатами
+function downloadFile() {
+    if (!output.value || output.value.length === 0) {
+        alert("Нет данных для сохранения");
+        return;
+    }
+
+    // формируем текст файла
+    const content = output.value
+        .map(c => `${c.re.toFixed(6)} ${c.im.toFixed(4)}`)
+        .join("\n");
+
+    // создаём Blob
+    const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+
+    // создаём временную ссылку
+    const url = URL.createObjectURL(blob);
+
+    // создаём <a> для скачивания
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `fft_N${N.value}.txt`;
+    document.body.appendChild(a);
+    a.click();
+
+    // очистка
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
 </script>
 
 <template>
+<div class="page">    
     <div class="panel">
         <h2>Алгоритм БПФ по основанию 2</h2>
 
         <div class="params">
-            <h3>Параметры:</h3>
 
+            <h3>Параметры:</h3>
             <!-- Ввод массива -->
             <div class="param">
                 <div class="param-row small">
                     <div class="param-label">Входные отсчёты</div>
-                    <div class="param-range">через запятую ({{ N }} элементов)</div>
+                    <div v-if="!fileExist" class="param-range">Элементы через запятую</div>
+                    <div v-else class="param-range">Файл загружен</div>
                 </div>
-                <div class="param-row right-side">
-                    <input v-model="inputText" :class="inputTextClass" class="param-input width-line" />
+                <div class="param-row right-side ans-btn">
+                    <div class="file-upload">
+                        <input type="file" id="fileInput" accept=".txt" @change="onFileChange" hidden />
+
+                        <label v-if="!fileExist" for="fileInput" class="file-btn">
+                            <Icon icon="ic:round-upload" width="24" height="24" />
+                            <span>Загрузить</span>
+                        </label>
+
+                        <label v-if="fileExist" for="fileInput" class="file-btn">
+                            <Icon icon="ic:round-done" width="24" height="24" />
+                            <span>Загружено</span>
+                        </label>
+                    </div>
+
+                    <input v-if="!fileExist" v-model="inputText" :class="inputTextClass"
+                        class="param-input width-line" />
                 </div>
             </div>
 
@@ -133,7 +219,7 @@ const output = computed(() => {
 
             <!-- Ответ -->
             <h3>Результат FFT:</h3>
-            <table border="1" cellpadding="4" class="answ-table">
+            <table v-if="!fileExist" border="1" cellpadding="4" class="answ-table">
                 <thead>
                     <tr>
                         <th>k</th>
@@ -149,11 +235,143 @@ const output = computed(() => {
                     </tr>
                 </tbody>
             </table>
+
+            <div v-else class="file-btn" style="width: 9rem;" @click="downloadFile">
+                <Icon icon="ic:round-download" width="24" height="24" />
+                Скачать файл
+            </div>
         </div>
     </div>
+
+
+    <div class="help-panel">
+        <h3>Использование:</h3>
+        <!-- Замечания -->
+        <div class="param-text">
+            <div class="text-line">
+                <Icon icon="flowbite:caret-right-solid" class="icon-wrap" />
+                Для сигналов с 16 и менее отсчетов подойдет ручной ввод массива.
+            </div>
+
+            <div class="text-line">
+                <Icon icon="flowbite:caret-right-solid" class="icon-wrap" />
+                Для сигналов с большим числом отсчетов рекомендуется использовать ввод файлом.
+            </div>
+
+            <div class="text-line">
+                <Icon icon="flowbite:caret-right-solid" class="icon-wrap" />
+                Форматы файла:
+            </div>
+
+            <div class="text-line" style="justify-content: space-around;">
+                <div class="example-con">
+                    Через запятую:
+                    <div class="example">
+                        1.2, 3.5, -0.8, 4, 5
+                    </div>
+                </div>
+                <div class="example-con">
+                    В столбец:
+                    <div class="example">
+                        1.2<br>3.5<br>-0.8<br>4<br>5
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-line">
+                <Icon icon="flowbite:caret-right-solid" class="icon-wrap" />
+                Для удобства вы сможете скачать файл с полученным результатом
+            </div>
+
+            <div class="text-line">
+                <Icon icon="flowbite:caret-right-solid" class="icon-wrap" />
+                Формат файла:
+            </div>
+
+            <div class="text-line">
+                <div class="example-con">
+                    В столбец:
+                    <div class="example">
+                        Re1 Im1<br>Re2 Im2<br>Re3 Im3<br>Re4 Im4<br>Re5 Im5
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>    
 </template>
 
 <style scoped>
+.page {
+    width: 100%;
+    display: flex;
+    gap: 2rem;
+    justify-content: end;
+    margin-right: 5rem;
+}
+
+.help-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-radius: 20px;
+    width: 400px;
+    padding: 20px;
+    background-color: rgba(23, 23, 23, 1);
+    color: rgb(200, 200, 200);
+    box-shadow: 0px 0px 100px 30px rgba(23, 23, 23, 1);
+}
+
+.param-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding: 12px 15px;
+    border: 1px solid rgba(97, 97, 97, 0.3);
+    border-radius: 15px;
+    background: rgba(40, 40, 40, 0.5);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.text-line {
+    display: flex;
+    flex-direction: row;
+    gap: 0.5rem;
+    padding: 5px;
+}
+
+.icon-wrap {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.icon-wrap svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+.example-con {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: center;
+
+}
+
+.example {
+    background-color: rgb(100, 100, 100);
+    color: rgb(200, 200, 200);
+    width: 130px;
+    height: 100px;
+    border-radius: 10px;
+    padding: 10px;
+}
+
 .param-ans {
     width: 8rem;
 }
@@ -179,7 +397,35 @@ const output = computed(() => {
 }
 
 .param-row.right-side {
-    display: flex; 
+    display: flex;
     justify-content: end;
+}
+
+.ans-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.file-btn {
+    border: 1px solid rgba(97, 97, 97, 0.3);
+    border-radius: 1.5rem;
+    font-size: 1rem;
+    width: 7rem;
+    height: 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    font-size: small;
+}
+
+.file-btn:hover {
+    background: rgba(80, 80, 80, 0.8);
+}
+
+.file-btn:active {
+    transform: scale(0.97);
 }
 </style>
