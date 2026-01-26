@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed } from "vue";
 import { Icon } from "@iconify/vue";
+import { onFileChange as handleFileChange, downloadFile as handleDownloadFile } from "../utils/fileHandlers.js";
 
 // ---------------- Комплексные числа ----------------
 class Complex {
@@ -92,68 +93,16 @@ const output = computed(() => {
 
 //Чтение с файла
 function onFileChange(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    if (!file.name.endsWith(".txt")) {
-        alert("Поддерживаются только .txt файлы");
-        return;
-    }
-
-    fileExist.value = true;
-
-    const reader = new FileReader();
-
-    reader.onload = e => {
-
-        const text = e.target.result;
-
-        // разбиваем по запятым и переводам строки
-        const values = text
-            .split(/[\s,]+/)
-            .map(v => parseFloat(v))
-            .filter(v => !isNaN(v));
-
-        if (values.length === 0) {
-            alert("Файл не содержит числовых данных");
-            return;
-        }
-
-        // обновляем inputText → всё остальное пересчитается автоматически
-        inputText.value = values.join(",");
-    };
-
-    reader.readAsText(file);
+    handleFileChange(event, {
+        fileExist,
+        inputText,
+        N
+    });
 }
 
 //Создание файла с результатами
 function downloadFile() {
-    if (!output.value || output.value.length === 0) {
-        alert("Нет данных для сохранения");
-        return;
-    }
-
-    // формируем текст файла
-    const content = output.value
-        .map(c => `${c.re.toFixed(6)} ${c.im.toFixed(4)}`)
-        .join("\n");
-
-    // создаём Blob
-    const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
-
-    // создаём временную ссылку
-    const url = URL.createObjectURL(blob);
-
-    // создаём <a> для скачивания
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `fft_N${N.value}.txt`;
-    document.body.appendChild(a);
-    a.click();
-
-    // очистка
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    handleDownloadFile(output, N, "dft");
 }
 
 </script>
@@ -310,18 +259,6 @@ function downloadFile() {
     margin-right: 5rem;
 }
 
-.help-panel {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    border-radius: 20px;
-    width: 400px;
-    padding: 20px;
-    background-color: rgba(23, 23, 23, 1);
-    color: rgb(200, 200, 200);
-    box-shadow: 0px 0px 100px 30px rgba(23, 23, 23, 1);
-}
-
 .param-text {
     display: flex;
     flex-direction: column;
@@ -353,23 +290,6 @@ function downloadFile() {
     width: 100%;
     height: 100%;
     display: block;
-}
-
-.example-con {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    align-items: center;
-
-}
-
-.example {
-    background-color: rgb(100, 100, 100);
-    color: rgb(200, 200, 200);
-    width: 130px;
-    height: 100px;
-    border-radius: 10px;
-    padding: 10px;
 }
 
 .param-ans {
@@ -408,24 +328,4 @@ function downloadFile() {
     gap: 0.5rem;
 }
 
-.file-btn {
-    border: 1px solid rgba(97, 97, 97, 0.3);
-    border-radius: 1.5rem;
-    font-size: 1rem;
-    width: 7rem;
-    height: 2rem;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    font-size: small;
-}
-
-.file-btn:hover {
-    background: rgba(80, 80, 80, 0.8);
-}
-
-.file-btn:active {
-    transform: scale(0.97);
-}
 </style>
