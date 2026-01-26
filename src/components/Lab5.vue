@@ -22,7 +22,7 @@ function twiddleDFT(k, n, N) {
 }
 
 const inputText = ref("1,2,3,4,5,6,7,8");
-const N = ref(8); // размер ДПФ
+const N = computed(() => parsedInput.value.length);
 const fileExist = ref(false);
 
 //Введенный массив
@@ -118,8 +118,8 @@ function downloadFile() {
                         <div class="param-label">Размер N</div>
                         <div class="param-range">Количество отсчётов</div>
                     </div>
-                    <div class="param-row big">
-                        <input v-model.number="N" type="number" min="1" class="param-input" />
+                    <div class="param-row big right-side">
+                        <div class="param-ans">{{ N }}</div>
                     </div>
                 </div>
 
