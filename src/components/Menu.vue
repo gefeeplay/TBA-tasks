@@ -9,19 +9,19 @@ const goToLab = (labName) => {
     activeLab.value = labName
     switch (labName) {
         case 'Lab1':
-            router.push('/')
+            router.push('/TBA-tasks')
             break
         case 'Lab2':
-            router.push('/Lab2')
+            router.push('/TBA-tasks/Lab2')
             break
         case 'Lab3':
-            router.push('/Lab3')
+            router.push('/TBA-tasks/Lab3')
             break
         case 'Lab4':
-            router.push('/Lab4')
+            router.push('/TBA-tasks/Lab4')
             break
         case 'Lab5':
-            router.push('/Lab5')
+            router.push('/TBA-tasks/Lab5')
             break
     }
 }

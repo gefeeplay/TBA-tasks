@@ -15,33 +15,29 @@ const router = createRouter({
   routes: [
     {
       name: 'Start',
-      path: '/',
+      path: '/TBA-tasks',
       component: Lab1
     },
     {
       name: 'Lab2',
-      path: '/Lab2',
+      path: '/TBA-tasks/Lab2',
       component: Lab2
     },
     {
       name: 'Lab3',
-      path: '/Lab3',
+      path: '/TBA-tasks/Lab3',
       component: Lab3
     },
     {
       name: 'Lab4',
-      path: '/Lab4',
+      path: '/TBA-tasks/Lab4',
       component: Lab4
     },
     {
       name: 'Lab5',
-      path: '/Lab5',
+      path: '/TBA-tasks/Lab5',
       component: Lab5
     }
-
-
-
-
   ]
 })
 
