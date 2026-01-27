@@ -59,7 +59,7 @@ export function downloadFile(output, N, prefix = "dft") {
 
     // формируем текст файла
     const content = output.value
-        .map(c => `${c.re.toFixed(6)} ${c.im.toFixed(4)}`)
+        .map(c => `${c.re.toFixed(3)} ${c.im.toFixed(3)}`)
         .join("\n");
 
     // создаём Blob
