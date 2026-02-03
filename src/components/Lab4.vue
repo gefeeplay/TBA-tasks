@@ -55,6 +55,8 @@ const paddedInput = computed(() => {
 
 //Алгоритм
 function fftRadix2(input) {
+    const tStart = performance.now();
+
     const n = input.length;
     const stages = Math.log2(n);
 
@@ -82,6 +84,11 @@ function fftRadix2(input) {
         }
     }
 
+    const tEnd = performance.now();
+    console.log(
+        `DFT (N=${n}) выполнено за ${(tEnd - tStart).toFixed(4)} мс`
+    );
+
     return a;
 }
 
@@ -108,146 +115,146 @@ function downloadFile() {
 </script>
 
 <template>
-<div class="page">    
-    <div class="panel">
-        <h2>Алгоритм БПФ по основанию 2</h2>
+    <div class="page">
+        <div class="panel">
+            <h2>Алгоритм БПФ по основанию 2</h2>
 
-        <div class="params">
+            <div class="params">
 
-            <h3>Параметры:</h3>
-            <!-- Ввод массива -->
-            <div class="param">
-                <div class="param-row small">
-                    <div class="param-label">Входные отсчёты</div>
-                    <div v-if="!fileExist" class="param-range">Элементы через запятую</div>
-                    <div v-else class="param-range">Файл загружен</div>
-                </div>
-                <div class="param-row right-side ans-btn">
-                    <div class="file-upload">
-                        <input type="file" id="fileInput" accept=".txt" @change="onFileChange" hidden />
-
-                        <label v-if="!fileExist" for="fileInput" class="file-btn">
-                            <Icon icon="ic:round-upload" width="24" height="24" />
-                            <span>Загрузить</span>
-                        </label>
-
-                        <label v-if="fileExist" for="fileInput" class="file-btn">
-                            <Icon icon="ic:round-done" width="24" height="24" />
-                            <span>Загружено</span>
-                        </label>
+                <h3>Параметры:</h3>
+                <!-- Ввод массива -->
+                <div class="param">
+                    <div class="param-row small">
+                        <div class="param-label">Входные отсчёты</div>
+                        <div v-if="!fileExist" class="param-range">Элементы через запятую</div>
+                        <div v-else class="param-range">Файл загружен</div>
                     </div>
+                    <div class="param-row right-side ans-btn">
+                        <div class="file-upload">
+                            <input type="file" id="fileInput" accept=".txt" @change="onFileChange" hidden />
 
-                    <input v-if="!fileExist" v-model="inputText" :class="inputTextClass"
-                        class="param-input width-line" />
-                </div>
-            </div>
+                            <label v-if="!fileExist" for="fileInput" class="file-btn">
+                                <Icon icon="ic:round-upload" width="24" height="24" />
+                                <span>Загрузить</span>
+                            </label>
 
-            <!-- Вывод N -->
-            <div class="param">
-                <div class="param-row small">
-                    <div class="param-label">Первоначальный размер N</div>
-                    <div class="param-range">Степень двойки</div>
-                </div>
-                <div class="param-row big">
-                    <div class="param-ans">{{ N0 }}</div>
-                    <div class="param-ans">{{ m }}</div>
-                </div>
-            </div>
+                            <label v-if="fileExist" for="fileInput" class="file-btn">
+                                <Icon icon="ic:round-done" width="24" height="24" />
+                                <span>Загружено</span>
+                            </label>
+                        </div>
 
-            <!-- Нули -->
-            <div class="param">
-                <div class="param-row small">
-                    <div class="param-label">Добавлено нулей</div>
-                    <div class="param-range">Итоговый размер N</div>
-                </div>
-                <div class="param-row big">
-                    <div class="param-ans">{{ zeros }}</div>
-                    <div class="param-ans">{{ N }}</div>
-                </div>
-            </div>
-
-            <!-- Ответ -->
-            <h3>Результат FFT:</h3>
-            <table v-if="!fileExist" border="1" cellpadding="4" class="answ-table">
-                <thead>
-                    <tr>
-                        <th>k</th>
-                        <th>Re</th>
-                        <th>Im</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="(c, i) in output" :key="i">
-                        <td>{{ i }}</td>
-                        <td>{{ c.re.toFixed(3) }}</td>
-                        <td>{{ c.im.toFixed(3) }}</td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <div v-else class="file-btn" style="width: 9rem;" @click="downloadFile">
-                <Icon icon="ic:round-download" width="24" height="24" />
-                Скачать файл
-            </div>
-        </div>
-    </div>
-
-
-    <div class="help-panel">
-        <h3>Использование:</h3>
-        <!-- Замечания -->
-        <div class="param-text">
-            <div class="text-line">
-                <Icon icon="flowbite:caret-right-solid" class="icon-wrap" />
-                Для сигналов с 16 и менее отсчетов подойдет ручной ввод массива.
-            </div>
-
-            <div class="text-line">
-                <Icon icon="flowbite:caret-right-solid" class="icon-wrap" />
-                Для сигналов с большим числом отсчетов рекомендуется использовать ввод файлом.
-            </div>
-
-            <div class="text-line">
-                <Icon icon="flowbite:caret-right-solid" class="icon-wrap" />
-                Форматы файла:
-            </div>
-
-            <div class="text-line" style="justify-content: space-around;">
-                <div class="example-con">
-                    Через запятую:
-                    <div class="example">
-                        1.2, 3.5, -0.8, 4, 5
+                        <input v-if="!fileExist" v-model="inputText" :class="inputTextClass"
+                            class="param-input width-line" />
                     </div>
                 </div>
-                <div class="example-con">
-                    В столбец:
-                    <div class="example">
-                        1.2<br>3.5<br>-0.8<br>4<br>5
+
+                <!-- Вывод N -->
+                <div class="param">
+                    <div class="param-row small">
+                        <div class="param-label">Первоначальный размер N</div>
+                        <div class="param-range">Степень двойки</div>
+                    </div>
+                    <div class="param-row big">
+                        <div class="param-ans">{{ N0 }}</div>
+                        <div class="param-ans">{{ m }}</div>
                     </div>
                 </div>
-            </div>
 
-            <div class="text-line">
-                <Icon icon="flowbite:caret-right-solid" class="icon-wrap" />
-                Для удобства вы сможете скачать файл с полученным результатом
-            </div>
-
-            <div class="text-line">
-                <Icon icon="flowbite:caret-right-solid" class="icon-wrap" />
-                Формат файла:
-            </div>
-
-            <div class="text-line">
-                <div class="example-con">
-                    В столбец:
-                    <div class="example">
-                        Re1 Im1<br>Re2 Im2<br>Re3 Im3<br>Re4 Im4<br>Re5 Im5
+                <!-- Нули -->
+                <div class="param">
+                    <div class="param-row small">
+                        <div class="param-label">Добавлено нулей</div>
+                        <div class="param-range">Итоговый размер N</div>
                     </div>
+                    <div class="param-row big">
+                        <div class="param-ans">{{ zeros }}</div>
+                        <div class="param-ans">{{ N }}</div>
+                    </div>
+                </div>
+
+                <!-- Ответ -->
+                <h3>Результат FFT:</h3>
+                <table v-if="!fileExist" border="1" cellpadding="4" class="answ-table">
+                    <thead>
+                        <tr>
+                            <th>k</th>
+                            <th>Re</th>
+                            <th>Im</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(c, i) in output" :key="i">
+                            <td>{{ i }}</td>
+                            <td>{{ c.re.toFixed(3) }}</td>
+                            <td>{{ c.im.toFixed(3) }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div v-else class="file-btn" style="width: 9rem;" @click="downloadFile">
+                    <Icon icon="ic:round-download" width="24" height="24" />
+                    Скачать файл
                 </div>
             </div>
         </div>
+
+
+        <div class="help-panel">
+            <h3>Использование:</h3>
+            <!-- Замечания -->
+            <div class="param-text">
+                <div class="text-line">
+                    <Icon icon="flowbite:caret-right-solid" class="icon-wrap" />
+                    Для сигналов с 16 и менее отсчетов подойдет ручной ввод массива.
+                </div>
+
+                <div class="text-line">
+                    <Icon icon="flowbite:caret-right-solid" class="icon-wrap" />
+                    Для сигналов с большим числом отсчетов рекомендуется использовать ввод файлом.
+                </div>
+
+                <div class="text-line">
+                    <Icon icon="flowbite:caret-right-solid" class="icon-wrap" />
+                    Форматы файла:
+                </div>
+
+                <div class="text-line" style="justify-content: space-around;">
+                    <div class="example-con">
+                        Через запятую:
+                        <div class="example">
+                            1.2, 3.5, -0.8, 4, 5
+                        </div>
+                    </div>
+                    <div class="example-con">
+                        В столбец:
+                        <div class="example">
+                            1.2<br>3.5<br>-0.8<br>4<br>5
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-line">
+                    <Icon icon="flowbite:caret-right-solid" class="icon-wrap" />
+                    Для удобства вы сможете скачать файл с полученным результатом
+                </div>
+
+                <div class="text-line">
+                    <Icon icon="flowbite:caret-right-solid" class="icon-wrap" />
+                    Формат файла:
+                </div>
+
+                <div class="text-line">
+                    <div class="example-con">
+                        В столбец:
+                        <div class="example">
+                            Re1 Im1<br>Re2 Im2<br>Re3 Im3<br>Re4 Im4<br>Re5 Im5
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-</div>    
 </template>
 
 <style scoped>
@@ -327,5 +334,4 @@ function downloadFile() {
     justify-content: center;
     gap: 0.5rem;
 }
-
 </style>

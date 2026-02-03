@@ -32,6 +32,8 @@ const parsedInput = computed(() =>
 
 //Алгоритм ДПФ (одномерный поразрядный метод)
 function dft(input, sizeN) {
+    const tStart = performance.now();
+
     const result = [];
 
     // Для каждого частотного индекса k
@@ -52,6 +54,11 @@ function dft(input, sizeN) {
 
         result.push(sum);
     }
+
+    const tEnd = performance.now();
+    console.log(
+        `DFT (N=${sizeN}) выполнено за ${(tEnd - tStart).toFixed(4)} мс`
+    );
 
     return result;
 }
