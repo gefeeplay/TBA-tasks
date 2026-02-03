@@ -7,6 +7,8 @@ import Lab2 from './components/Lab2.vue'
 import Lab3 from './components/Lab3.vue'
 import Lab4 from './components/Lab4.vue'
 import Lab5 from './components/Lab5.vue'
+import Lab6 from './components/Lab6.vue'
+import Lab7 from './components/Lab7.vue'
 
 const app = createApp(App)
 
@@ -37,6 +39,16 @@ const router = createRouter({
       name: 'Lab5',
       path: '/TBA-tasks/Lab5',
       component: Lab5
+    },
+    {
+      name: 'Lab6',
+      path: '/TBA-tasks/Lab6',
+      component: Lab6
+    },
+    {
+      name: 'Lab7',
+      path: '/TBA-tasks/Lab7',
+      component: Lab7
     }
   ]
 })

@@ -23,6 +23,12 @@ const goToLab = (labName) => {
         case 'Lab5':
             router.push('/TBA-tasks/Lab5')
             break
+        case 'Lab6':
+            router.push('/TBA-tasks/Lab6')
+            break
+        case 'Lab7':
+            router.push('/TBA-tasks/Lab7')
+            break
     }
 }
 </script>
@@ -49,9 +55,15 @@ const goToLab = (labName) => {
         <div class="list-item" :class="{ active: activeLab === 'Lab5' }" @click="goToLab('Lab5')">
             Лабораторная 5
         </div>
+        <div class="list-item" :class="{ active: activeLab === 'Lab6' }" @click="goToLab('Lab6')">
+            Лабораторная 6
+        </div>
+        <div class="list-item" :class="{ active: activeLab === 'Lab7' }" @click="goToLab('Lab7')">
+            Лабораторная 7
+        </div>
     </div>
     <div class="info me">
-        Выполнил: Моляров М. Л. <br/>
+        Выполнил: Моляров М. Л. <br />
         ИВТ-11-22
     </div>
 </template>
@@ -63,12 +75,14 @@ const goToLab = (labName) => {
     width: 250px;
     text-align: center;
 }
+
 .me {
     box-sizing: border-box;
     text-align: end;
     bottom: 1rem;
     padding-right: 1rem;
 }
+
 .list {
     padding-left: 25px;
     width: 100%;
@@ -93,8 +107,8 @@ const goToLab = (labName) => {
 }
 
 .list-item.active {
-  width: 11rem;
-  background: rgba(97, 97, 97, 0.1);
-  border-color: rgba(97, 97, 97, 0.8);
+    width: 11rem;
+    background: rgba(97, 97, 97, 0.1);
+    border-color: rgba(97, 97, 97, 0.8);
 }
 </style>
