@@ -36,10 +36,6 @@ export function onFileChange(event, refs) {
         // обновляем inputText → всё остальное пересчитается автоматически
         refs.inputText.value = values.join(",");
 
-        // Автоматически устанавливаем размер N равным количеству отсчётов (если передан)
-        if (refs.N) {
-            refs.N.value = values.length;
-        }
     };
 
     reader.readAsText(file);

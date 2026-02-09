@@ -21,6 +21,39 @@ function twiddleDFT(k, n, N) {
     return new Complex(Math.cos(angle), Math.sin(angle));
 }
 
+function toTwosComplement(value, bits) {
+    const max = 1 << bits;
+    return value < 0 ? max + value : value;
+}
+
+function getBit(value, bit) {
+    return (value >> bit) & 1;
+}
+
+function precomputeWeightSums(N, bitWidth) {
+    const table = [];
+
+    for (let k = 0; k < N; k++) {
+        table[k] = [];
+        for (let r = 0; r < bitWidth; r++) {
+            table[k][r] = new Complex(0, 0);
+        }
+    }
+
+    for (let k = 0; k < N; k++) {
+        for (let n = 0; n < N; n++) {
+            const w = twiddleDFT(k, n, N);
+            for (let r = 0; r < bitWidth; r++) {
+                // здесь пока только заготовка, заполнение будет по x_r
+                table[k][r].w_n = table[k][r].w_n || [];
+                table[k][r].w_n[n] = w;
+            }
+        }
+    }
+
+    return table;
+}
+
 const inputText = ref("1,2,3,4,5,6,7,8");
 const N = computed(() => parsedInput.value.length);
 const fileExist = ref(false);
@@ -31,33 +64,39 @@ const parsedInput = computed(() =>
 );
 
 //Алгоритм ДПФ (одномерный поразрядный метод)
-function dft(input, sizeN) {
+function opdft(input, N, bitWidth = 8) {
+
+    // Преобразуем вход в доп. код
+    const x_tc = input.map(x => toTwosComplement(Math.round(x.re), bitWidth));
+
+    const weights = precomputeWeightSums(N, bitWidth);
+
     const tStart = performance.now();
 
     const result = [];
 
-    // Для каждого частотного индекса k
-    for (let k = 0; k < sizeN; k++) {
-        let sum = new Complex(0, 0);
+    for (let k = 0; k < N; k++) {
+        let Xk = new Complex(0, 0);
 
-        // Суммируем по всем временным отсчётам n
-        for (let n = 0; n < sizeN; n++) {
-            // Берём входной отсчёт (если есть) или ноль
-            const x_n = n < input.length ? input[n] : new Complex(0, 0);
+        for (let r = 0; r < bitWidth; r++) {
+            let Cks = new Complex(0, 0);
 
-            // Вычисляем поворотный множитель W_N^(kn) = e^(-j*2π*k*n/N)
-            const w = twiddleDFT(k, n, sizeN);
+            for (let n = 0; n < N; n++) {
+                if (getBit(x_tc[n], r)) {
+                    Cks = Cks.add(weights[k][r].w_n[n]);
+                }
+            }
 
-            // Добавляем к сумме: x[n] * W_N^(kn)
-            sum = sum.add(w.mul(x_n));
+            // учёт веса разряда
+            Xk = Xk.add(Cks.scale(1 << r));
         }
 
-        result.push(sum);
+        result.push(Xk);
     }
 
     const tEnd = performance.now();
     console.log(
-        `DFT (N=${sizeN}) выполнено за ${(tEnd - tStart).toFixed(4)} мс`
+        `ОПДПФ (N=${N}, bits=${bitWidth}) за ${(tEnd - tStart).toFixed(4)} мс`
     );
 
     return result;
@@ -66,7 +105,7 @@ function dft(input, sizeN) {
 //Расчет
 const output = computed(() => {
     if (!parsedInput.value.length || !N.value || N.value <= 0) return [];
-    return dft(parsedInput.value, N.value);
+    return opdft(parsedInput.value, N.value, 8);
 });
 
 //Чтение с файла
