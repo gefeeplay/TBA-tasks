@@ -47,7 +47,6 @@ function modInverse(a, m) {
     return x1;
 }
 
-/*
 //КТО для восстановления
 function crt(residues, moduli) {
     const M = moduli.reduce((acc, m) => acc * m, 1);
@@ -61,7 +60,6 @@ function crt(residues, moduli) {
 
     return mod(result, M);
 }
-*/
 
 // Поиск примитивного корня
 function findPrimitiveRoot(N, m) {
@@ -79,7 +77,6 @@ function findPrimitiveRoot(N, m) {
     }
     return null;
 }
-
 
 //БПФ radix-8 DIF
 function fftRadix8_DIF(x, m, root) {
@@ -238,6 +235,7 @@ const output = computed(() => {
 
         result.push({
             residues: rk,
+            reconstructed: crt(rk, moduli.value)
         });
     }
 
@@ -295,12 +293,15 @@ function onFileChange(event) {
 function downloadFile() {
 
     let text = "k\t" +
-        moduli.value.map(m => `mod ${m}`).join("\t") + "\n";
+        moduli.value.map(m => `mod ${m}`).join("\t") +
+        "\tCRT\n";
 
     output.value.forEach((row, i) => {
         text += i + "\t" +
             row.residues.join("\t") +
-            "\t" + "\n";
+            "\t" +
+            row.reconstructed +
+            "\n";
     });
 
     const blob = new Blob([text], { type: "text/plain" });
@@ -393,6 +394,7 @@ function downloadFile() {
                             <th v-for="m in moduli" :key="m">
                                 mod {{ m }}
                             </th>
+                            <th>CRT</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -402,6 +404,7 @@ function downloadFile() {
                             <td v-for="(val, j) in row.residues" :key="j">
                                 {{ val }}
                             </td>
+                            <td>{{ row.reconstructed }}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -421,7 +424,7 @@ function downloadFile() {
     width: 100%;
     display: flex;
     gap: 2rem;
-    justify-content: end;
+    justify-content: center;
     margin-right: 5rem;
 }
 
